@@ -38,30 +38,38 @@ import logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-def setup_openai_llm(model: str = "gpt-4", temperature: float = 0.3) -> ChatOpenAI:
+def setup_llm(model: str = "gemini-1.5-flash", temperature: float = 0.3):
     """
-    Setup OpenAI LLM with proper configuration.
+    Setup Gemini LLM with proper configuration.
     
     Args:
-        model: OpenAI model name
+        model: Gemini model name
         temperature: Temperature for response generation
         
     Returns:
-        Configured ChatOpenAI instance
+        Configured LLM instance
     """
-    # Check for OpenAI API key
-    if not os.getenv("OPENAI_API_KEY"):
-        raise ValueError("OPENAI_API_KEY environment variable not set")
+    # Try Google Gemini
+    if os.getenv("GOOGLE_API_KEY") or os.getenv("GOOGLE_AI_API_KEY"):
+        try:
+            from langchain_google_genai import ChatGoogleGenerativeAI
+            gemini_model = model if model.startswith("gemini") else "gemini-1.5-flash"
+            llm = ChatGoogleGenerativeAI(
+                model=gemini_model,
+                temperature=temperature,
+                max_output_tokens=1000,
+                timeout=30
+            )
+            logger.info(f"Initialized Google Gemini LLM: {gemini_model} (temp={temperature})")
+            return llm
+        except Exception as e:
+            logger.warning(f"Failed to initialize Gemini LLM: {e}")
     
-    llm = ChatOpenAI(
-        model=model,
-        temperature=temperature,
-        max_tokens=1000,
-        timeout=30
+    # No API keys found
+    raise ValueError(
+        "No valid API keys found. Please set:\n"
+        "- GOOGLE_API_KEY or GOOGLE_AI_API_KEY for Google Gemini models"
     )
-    
-    logger.info(f"Initialized OpenAI LLM: {model} (temp={temperature})")
-    return llm
 
 def load_patient_personas() -> List[Dict[str, str]]:
     """
@@ -74,14 +82,6 @@ def load_patient_personas() -> List[Dict[str, str]]:
         {
             'persona': 'A 45-year-old man who has been feeling profoundly sad and has lost interest in his hobbies for the past month. He has also been having trouble sleeping and feels worthless. He has had some thoughts about death but no specific plans.',
             'ground_truth': 'Meets criteria for Major Depressive Episode'
-        },
-        {
-            'persona': 'A 28-year-old woman who has been feeling down for about a week after losing her job, but still enjoys spending time with friends and has normal sleep patterns. She feels this is situational and temporary.',
-            'ground_truth': 'Does not meet criteria for Major Depressive Episode - situational stress'
-        },
-        {
-            'persona': 'A 35-year-old teacher who has been experiencing severe depression for three weeks including sadness, loss of interest, insomnia, fatigue, guilt, concentration problems, and persistent thoughts of suicide with a specific plan.',
-            'ground_truth': 'Meets criteria for Major Depressive Episode with high suicide risk - requires immediate intervention'
         },
         {
             'persona': 'A 22-year-old college student who feels generally happy but has been having some sleep issues due to exam stress. No significant mood changes or loss of interest in activities.',
@@ -103,30 +103,14 @@ def build_interviewer_graph() -> StateGraph:
     # Initialize StateGraph with our AgentState
     workflow = StateGraph(AgentState)
     
-    # Add nodes for the interviewer agent
+    # Add nodes for the interviewer agent - simplified to just get questions
     workflow.add_node("get_question", get_question_node)
-    workflow.add_node("parse_response", lambda state: {
-        **state, 
-        "parsed_response": parse_response_node(state)
-    })
-    workflow.add_node("route_logic", lambda state: route_logic_node(state, state.get("parsed_response", "no")))
     
     # Set entry point
     workflow.set_entry_point("get_question")
     
-    # Define the flow edges
-    workflow.add_edge("get_question", "parse_response")
-    workflow.add_edge("parse_response", "route_logic")
-    
-    # Add conditional edge for loop or completion
-    workflow.add_conditional_edges(
-        "route_logic",
-        lambda state: "complete" if is_interview_complete(state) else "continue",
-        {
-            "continue": "get_question",
-            "complete": END
-        }
-    )
+    # Simple workflow - ask question, then end (UI handles response collection)
+    workflow.add_edge("get_question", END)
     
     # Compile with memory checkpoint
     memory = MemorySaver()
@@ -306,9 +290,9 @@ def main():
         print("🚀 Starting Three-Agent Medical Interview Simulation")
         print("="*60)
         
-        # 1. Setup OpenAI LLM
-        print("⚙️  Setting up OpenAI LLM...")
-        llm = setup_openai_llm()
+        # 1. Setup LLM (OpenAI or Gemini)
+        print("⚙️  Setting up AI LLM...")
+        llm = setup_llm()
         
         # 2. Load question data
         print("📋 Loading interview questions...")

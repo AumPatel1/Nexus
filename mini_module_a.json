@@ -125,13 +125,25 @@
         "no_destination": "CHECK_DIAGNOSIS"
       }
     },
-    "CHECK_DIAGNOSIS": {
-      "module": "A",
-      "is_screener": false,
-      "question_text": "Internal Logic: Check if symptom count is 5 or more (including at least one of A1/A2) and if A10 is Yes and A11 is No.",
-      "skip_logic": {
-        "diagnosis_met": "END_MODULE_SUCCESS",
-        "diagnosis_not_met": "END_MODULE_FAIL"
-      }
-    }
-  }
+         "CHECK_DIAGNOSIS": {
+       "module": "A",
+       "is_screener": false,
+       "question_text": "Internal Logic: Check if symptom count is 5 or more (including at least one of A1/A2) and if A10 is Yes and A11 is No.",
+       "skip_logic": {
+         "diagnosis_met": "END_MODULE_SUCCESS",
+         "diagnosis_not_met": "END_MODULE_FAIL"
+       }
+     },
+     "END_MODULE_SUCCESS": {
+       "module": "A",
+       "is_screener": false,
+       "question_text": "Thank you for completing the screening. Based on your responses, you meet the criteria for major depressive episode.",
+       "skip_logic": {}
+     },
+     "END_MODULE_FAIL": {
+       "module": "A", 
+       "is_screener": false,
+       "question_text": "Thank you for completing the screening. Based on your responses, you do not meet the criteria for major depressive episode at this time.",
+       "skip_logic": {}
+     }
+   }

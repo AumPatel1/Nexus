@@ -63,15 +63,28 @@ graph TD
 
 ```
 AGenticAI/
-├── main.py                 # Main simulation orchestrator
-├── agents.py               # Three agent definitions
-├── utils.py                # AgentState and utility functions  
-├── mini_module_a.json      # Interview question flow logic
-├── requirements.txt        # Python dependencies
-└── README.md              # This file
+├── app.py                  # 🌐 Streamlit Web UI (Main Interface)
+├── run_ui.py               # 🚀 Web UI launcher script
+├── setup_guide.py          # 📋 Interactive setup guide
+├── install_gemini.py       # 🔧 Quick Gemini installer
+├── main.py                 # 🖥️ Command-line simulation orchestrator
+├── agents.py               # 🤖 Three agent definitions
+├── utils.py                # 🛠️ AgentState and utility functions  
+├── mini_module_a.json      # 📋 Interview question flow logic
+├── requirements.txt        # 📦 Python dependencies
+└── README.md              # 📚 This documentation
 ```
 
 ## 🚀 Quick Start
+
+### 0. First Time? Run the Setup Guide! ⭐
+
+```bash
+# Get step-by-step instructions
+python setup_guide.py
+```
+
+This interactive guide will check your setup and show you exactly how to get your OpenAI API key!
 
 ### 1. Setup Environment
 
@@ -82,13 +95,39 @@ cd AGenticAI
 # Install dependencies
 pip install -r requirements.txt
 
-# Set OpenAI API key
-export OPENAI_API_KEY="your-openai-api-key-here"
+# Optional: Add Gemini support
+python install_gemini.py
 ```
 
-### 2. Run the Simulation
+### 2. Option A: Web UI (Recommended) 🌐
 
 ```bash
+# Launch the beautiful web interface
+python run_ui.py
+
+# Or directly with streamlit
+streamlit run app.py
+```
+
+**Features:**
+- 🏗️ **Architecture Visualization** - See the system diagram
+- 🤖 **Multiple AI Providers** - Choose OpenAI or Google Gemini
+- 🔑 **Easy API Key Setup** - Enter your API key in the sidebar  
+- 💬 **Real-time Conversation** - Watch the interview unfold
+- 📊 **Live Status Monitoring** - Track progress and risk levels
+- ⚖️ **Judge Evaluation** - Get detailed performance analysis
+- 💾 **Session Management** - Save and load interviews
+
+The web app will open at `http://localhost:8501`
+
+### 3. Option B: Command Line Interface
+
+```bash
+# Set API key (choose one)
+export OPENAI_API_KEY="your-openai-key"     # For OpenAI
+export GOOGLE_API_KEY="your-gemini-key"     # For Google Gemini
+
+# Run console simulation
 python main.py
 ```
 
@@ -179,12 +218,16 @@ Edit `mini_module_a.json` to change:
 - [x] Judge evaluation system
 
 ### 🚀 **Enhanced for Production**
+- [x] **🌐 Beautiful Web UI** with Streamlit interface
+- [x] **🤖 Multi-Provider Support** - OpenAI & Google Gemini
+- [x] **🏗️ Architecture Visualization** with interactive diagrams
+- [x] **🔑 Easy API Key Management** in the sidebar
+- [x] **💬 Real-time Conversation Display** with color-coded messages
+- [x] **📊 Live Status Monitoring** and risk assessment
+- [x] **⚖️ Interactive Judge Evaluation** with expandable details
+- [x] **💾 Session Management** with save/load functionality
 - [x] Comprehensive error handling
-- [x] Safety monitoring and risk assessment
-- [x] Session management and logging
 - [x] Multiple patient scenarios
-- [x] Detailed performance metrics
-- [x] Beautiful console output formatting
 - [x] JSON session data export
 
 ## 🔒 Safety Features
